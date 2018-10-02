@@ -1,20 +1,15 @@
 const height=550;
 const paddleSpeed=0.7;
-const ballSpeed=.07;
+const ballSpeed=.5;
 
-//dimensions
+
 const width=height*0.9;
-const wall= width/50;
 
 
-const ballSize=30
 let serveAngle=150;
 let add=0;
 let start=false;
 
-//colors
-
-// def
 const Direction={
   LEFT:0,
   RIGHT:1,
@@ -26,7 +21,7 @@ canvas.width=width;
 canvas.height=height;
 $('body').append(canvas);
 let ctx = canvas.getContext('2d');
-ctx.lineWidth=wall;
+ctx.lineWidth=width/50;
 
 //game javascript
 var ball, paddle;
@@ -57,9 +52,6 @@ function loop(timeNow){
 
 
   drawBall();
-if(!start){
-//  drawLine();
-}
 
 
   requestAnimationFrame(loop);
@@ -73,13 +65,15 @@ function applyBallSpeed(angle){
     ctx.fillRect(0,0,canvas.width,canvas.height);
   }
   function drawBall() {
-       ctx.beginPath();
-       ctx.fillStyle = "blue";
+        ctx.beginPath();
+        ctx.fillStyle = "blue";
+        ctx.arc(ball.x, ball.y, 10, 0, Math.PI*2);
+
+        ctx.fill();
+        ctx.closePath();
 
 
-       ctx.fillRect(ball.x - ball.w * 0.5, ball.y - ball.h * 0.5, ball.w, ball.h);
 
-       ctx.fillStyle = "blue";
 
 
    }
@@ -89,29 +83,6 @@ function applyBallSpeed(angle){
   }
 
 
-// function drawLine(){
-//   ctx.strokeStyle='green'
-//   ctx.beginPath();
-//   if(serveAngle>=150 ){
-//     add=-1.8;
-//     serveAngle+=add;
-//   }
-//   else if(serveAngle<=(-150)){
-//     add=1.8;
-//     serveAngle+=add;
-//   }
-//   else{
-//
-//   serveAngle+=add;
-//
-//   ctx.moveTo(ball.x+serveAngle,400);
-// }
-//
-//
-//   ctx.lineTo(ball.x,500);
-//   ctx.stroke();
-//
-// }
 
        function keyDown(ev) {
              switch (ev.keyCode) {
@@ -179,13 +150,7 @@ function applyBallSpeed(angle){
 
     if(ball.dy===0){
       ball.x=paddle.x;
-}
-
-
     }
-
-
-    function  updateBall(delta){
         ball.x += ball.dx*delta;
         ball.y += ball.dy*delta;
 
@@ -199,8 +164,8 @@ function applyBallSpeed(angle){
     }
 
     function Ball() {
-     this.w = ballSize;
-     this.h = ballSize;
+     this.w = 30;
+     this.h = 30;
      this.x = paddle.x;
      this.y = paddle.y - paddle.h / 2 - this.h / 2;
      this.spd = ballSpeed * width;
