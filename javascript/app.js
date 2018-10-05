@@ -5,7 +5,10 @@ let brickRows = 5;
 let margin = 3;
 let brickGap = 3;
 spin = .4;
-let lives = 3;
+
+
+let level, lives, score;
+
 const stages = {
   cookieMonster: [
     '000wwww0wwww0000',
@@ -83,7 +86,7 @@ $('body').append(canvas);
 //game javascript
 var ball, paddle;
 bricks = []
-
+let brickTotal;
 //new game
 let height, width, wall;
 setDimensions();
@@ -106,14 +109,14 @@ function loop(timeNow) {
   timeStamp = (timeNow - timeLast) / 1000;
   timeLast = timeNow;
   //upate
+  if (game) {
+    updatePaddle(timeStamp);
+    updateBricks(timeStamp);
+    updateBall(timeStamp);
 
-  updatePaddle(timeStamp);
-  updateBricks(timeStamp);
-  updateBall(timeStamp);
-
-
+  }
   drawBackground();
-  drawScore();
+  drawText();
 
   drawPaddle();
   drawBricks();
@@ -166,8 +169,8 @@ function createBricks(obj) {
   let array = obj;
   brickRows = array.length;
   brickCols = array[1].length
-
-  let areaY =470;
+  brickTotal = brickCols * brickRows;
+  let areaY = 470;
 
   let totalRows = margin + brickRows;
   let rowH = areaY / totalRows;
@@ -197,11 +200,8 @@ function createBricks(obj) {
       } else {
         bricks[i][j] = null;
       }
-
-
     }
   }
-
 
 }
 
@@ -210,10 +210,21 @@ function drawBackground() {
   ctx.fillStyle = '#D4CBE6';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
-function drawScore() {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#0095DD";
-    ctx.fillText("Lives: "+lives, canvas.width-200, 20);
+
+function drawText() {
+  ctx.font = "30px 'Press Start 2P'";
+  ctx.fillStyle = "#C9797B";
+  ctx.textAlign = 'left';
+  ctx.fillText("Score:" + score, 0, 50);
+  ctx.textAlign = 'center';
+  ctx.fillText("Balls:" + lives + "/3", canvas.width / 2, 50);
+  ctx.textAlign = 'right';
+  ctx.fillText("level:" + level, canvas.width, 50);
+  if (!game) {
+    ctx.fillText("GAME OVER", canvas.width / 2, paddle.y - 200);
+    ctx.font = "10px 'Press Start 2P'";
+    ctx.fillText("press space for new game!", canvas.width / 2, paddle.y - 150);
+  }
 }
 
 function drawBall() {
@@ -255,6 +266,9 @@ function keyDown(ev) {
     case 32:
 
       serve();
+      if (!game) {
+        newGame();
+      }
 
       break;
     case 37:
@@ -299,50 +313,76 @@ function movePaddle(direction) {
 function setDimensions() {
   height = window.innerHeight;
   width = window.innerWidth;
-
-
   canvas.width = width;
   canvas.height = height;
   newGame();
+}
 
-
+function newBall() {
+  paddle = new Paddle();
+  ball = new Ball();
 }
 
 function newGame() {
-  paddle = new Paddle();
-  ball = new Ball();
-  lvl = 0;
-
-  createBricks(stages.joker);
+  game = true;
+  lives = 3;
+  level = 1;
+  score = 0;
+  newLevel(level);
 }
+
+function newLevel(level) {
+
+  newBall();
+
+  let map = (Object.keys(stages)[3])
+
+  createBricks(stages[map])
+}
+
+//createBricks(stages[0]);
 
 function serve() {
   if (ball.dy != 0) {
     return;
   }
+
   let angle = Math.random() * Math.PI / 2 + Math.PI / 4 //random angle between
   //45 and 135 degrees
 
 
   applyBallSpeed(angle);
 }
-function newAngleAfterColision(){
+
+function newAngleAfterColision() {
   //           takes the velocities of the ball and returns a angle in rads
-              // -dy to change directions
+  // -dy to change directions
+
   let angle = Math.atan2(-ball.dy, ball.dx);
 
-            //gets a random degree +- 45 degrees than uses spin to
-            //change the trajectory slightly
-  angle += (Math.random() * Math.PI / 2 - Math.PI / 4)* spin;
-  if(angle<Math.PI/6){
-    angle=Math.PI/6 //make sure the angle isnt smaller than 30 degress
-  }
-  else if(angle>Math.PI*5/6){
-    angle=Math.PI*5/6//make sure angle isnt greater than 150 degrees
+  angle += (Math.random() * Math.PI / 2 - Math.PI / 4) * spin;
 
+  //gets a random degree +- 45 degrees than uses spin to
+  //change the trajectory slightly
+  if (ball.dy < 0) {
+
+    if (angle < Math.PI / 6) {
+      angle = Math.PI / 6 //make sure the angle isnt smaller than 30 degress
+    } else if (angle > Math.PI * 5 / 6) {
+      angle = Math.PI * 5 / 6 //make sure angle isnt greater than 150 degrees
+
+    }
+  } else {
+    if (angle > (-(Math.PI / 6))) {
+      angle = (-(Math.PI / 6)) //make sure the angle isnt smaller than 30 degress
+    } else if (angle < (-(Math.PI * 5 / 6))) {
+      angle = Math.PI * 5 / 6 //make sure angle isnt greater than 150 degrees
+    }
   }
 
-  }
+
+  applyBallSpeed(angle);
+}
 
 
 
@@ -354,12 +394,18 @@ function updateBall(delta) {
   if (ball.x < 0 + ball.r) {
     ball.x = 0 + ball.r;
     ball.dx = -ball.dx;
+    newAngleAfterColision(); //change angle based on sligt spin
+
   } else if (ball.x > canvas.width - ball.r) {
     ball.x = canvas.width - ball.r;
     ball.dx = -ball.dx;
+    newAngleAfterColision(); //change angle based on sligt spin
+
   } else if (ball.y < 0 + ball.r) {
     ball.y = 0 + ball.r;
     ball.dy = -ball.dy;
+    newAngleAfterColision(); //change angle based on sligt spin
+
   }
 
 
@@ -370,26 +416,28 @@ function updateBall(delta) {
     ball.x < paddle.x + paddle.w / 2 + ball.r) {
     ball.y = paddle.y - paddle.h / 2 - ball.r;
     ball.dy = -ball.dy;
-    newAngleAfterColision();
+    newAngleAfterColision(); //change angle based on sligt spin
 
   }
 
   // modify the angle based off ball spin
 
-
+  function outOfBounds() {
+    if (lives > 0) {
+      lives--;
+    } else {
+      game = false;
+    }
+  }
   //ball out of bounds
   if (ball.y > canvas.height) {
-  if(lives<=0){
-    newGame();
-  }
-  else{
+    outOfBounds();
     ball.x = paddle.x; //ball starts on paddle
     ball.y = paddle.y - paddle.h / 2 - ball.h / 2; //sets it on top
     ball.dx = 0;
     ball.dy = 0;
-    lives--;
 
-  }
+
   }
 
   //start ball on paddle
@@ -403,9 +451,27 @@ function updateBricks(delta) {
   OUTER: for (let i = 0; i < bricks.length; i++) {
     for (let j = 0; j < brickCols; j++) {
       if (bricks[i][j] != null && bricks[i][j].intersect(ball)) {
-
+        score += 1;
+        brickTotal--;
+        if (ball.dy < 0) { // upwards
+          ball.y = bricks[i][j].bot + ball.h/2;
+        } else { // downwards
+          ball.y = bricks[i][j].top - ball.r/2;
+        }
         bricks[i][j] = null;
+
+
+
         ball.dy = -ball.dy;
+        newAngleAfterColision(); //change angle based on sligt spin
+        if (brickTotal == 0) {
+          level++;
+          if(level>4){
+            game=false;
+          }
+          newLevel(level);
+        }
+
         break OUTER;
 
       }
@@ -445,6 +511,7 @@ function Brick(left, top, w, h, color) {
   this.top = top;
   this.color = color;
 
+
   this.intersect = function(ball) {
     let bBot = ball.y + ball.r;
     let bLeft = ball.x - ball.r;
@@ -466,5 +533,6 @@ function Paddle() {
   this.x = canvas.width / 2; //halfway across screen
   this.y = canvas.height - 30; //bottom of screen with space underneeth
   this.dx = 0;
+
 
 }
