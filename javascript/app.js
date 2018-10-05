@@ -166,7 +166,8 @@ function applyBallSpeed(angle) {
 }
 
 function createBricks(obj) {
-  let array = obj;
+  array = obj;
+
   brickRows = array.length;
   brickCols = array[1].length
   brickTotal = brickCols * brickRows;
