@@ -76,7 +76,7 @@ const Direction = {
   RIGHT: 1,
   STOP: 2
 }
-
+alert('spacebar to start left-right arrows to play')
 let canvas = document.createElement("canvas");
 
 
@@ -167,7 +167,6 @@ function applyBallSpeed(angle) {
 
 function createBricks(obj) {
   let array = obj;
-  console.log(array,obj);
   brickRows = array.length;
   brickCols = array[1].length
   brickTotal = brickCols * brickRows;
@@ -205,7 +204,7 @@ function createBricks(obj) {
   }
 
 }
-pensi
+
 
 function drawBackground() {
   ctx.fillStyle = '#D4CBE6';
@@ -336,7 +335,7 @@ function newLevel(level) {
 
   newBall();
 
-  let map = (Object.keys(stages)[level-1])
+  let map = (Object.keys(stages)[3])
 
   createBricks(stages[map])
 }
