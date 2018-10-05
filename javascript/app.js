@@ -335,7 +335,7 @@ function newLevel(level) {
 
   newBall();
 
-  let map = (Object.keys(stages)[3])
+  let map = (Object.keys(stages)[level-1])
 
   createBricks(stages[map])
 }
